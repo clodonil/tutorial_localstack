@@ -1,0 +1,11 @@
+README.md
+setup.cfg
+setup.py
+localstack_client/__init__.py
+localstack_client/config.py
+localstack_client/session.py
+localstack_client.egg-info/PKG-INFO
+localstack_client.egg-info/SOURCES.txt
+localstack_client.egg-info/dependency_links.txt
+localstack_client.egg-info/requires.txt
+localstack_client.egg-info/top_level.txt

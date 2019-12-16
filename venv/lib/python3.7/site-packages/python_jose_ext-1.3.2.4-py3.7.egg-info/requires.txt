@@ -1,0 +1,4 @@
+pycryptodomex==3.4.9
+six<2.0
+ecdsa<1.0
+future<1.0

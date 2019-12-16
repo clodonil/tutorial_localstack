@@ -1,0 +1,12 @@
+README.md
+setup.cfg
+setup.py
+airspeed/__init__.py
+airspeed/api.py
+airspeed.egg-info/PKG-INFO
+airspeed.egg-info/SOURCES.txt
+airspeed.egg-info/dependency_links.txt
+airspeed.egg-info/entry_points.txt
+airspeed.egg-info/requires.txt
+airspeed.egg-info/top_level.txt
+airspeed.egg-info/zip-safe

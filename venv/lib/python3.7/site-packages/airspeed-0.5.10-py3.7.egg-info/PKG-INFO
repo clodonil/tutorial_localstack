@@ -1,0 +1,19 @@
+Metadata-Version: 1.1
+Name: airspeed
+Version: 0.5.10
+Summary: Airspeed is a powerful and easy-to-use templating engine for Python that aims for a high level of compatibility with the popular Velocity library for Java.
+Home-page: https://github.com/purcell/airspeed/
+Author: Steve Purcell and Chris Tarttelin
+Author-email: steve@pythonconsulting.com, chris@pythonconsulting.com
+License: BSD
+Download-URL: http://pypi.python.org/pypi/airspeed/
+Description: UNKNOWN
+Keywords: web.templating
+Platform: UNKNOWN
+Classifier: Environment :: Web Environment
+Classifier: Intended Audience :: Developers
+Classifier: License :: OSI Approved :: BSD License
+Classifier: Operating System :: OS Independent
+Classifier: Programming Language :: Python
+Classifier: Topic :: Internet :: WWW/HTTP :: Dynamic Content
+Classifier: Topic :: Software Development :: Libraries :: Python Modules

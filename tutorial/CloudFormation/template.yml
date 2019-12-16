@@ -1,0 +1,84 @@
+---
+Description: CodePipeline notifications.
+AWSTemplateFormatVersion: '2010-09-09'
+Parameters:
+  SQSFila:
+    Description: Nome da Queue
+    Type: String
+
+  DyTableName:
+    Description: Nome da table do DynamoDB
+    Type: String
+
+  S3Bucket:
+    Description: Nome do Bucket S3
+    Type: String
+
+
+Resources:
+  RoleSQSCodeMetrics:
+    Type: AWS::IAM::Role
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service:
+                - events.amazonaws.com
+                - sqs.amazonaws.com
+            Action:
+              - sts:AssumeRole
+      Path: "/"
+      Policies:
+        - PolicyName: SqsCodeMetricsRole
+          PolicyDocument:
+            Version: '2012-10-17'
+            Statement:
+              - Effect: Allow
+                Action:
+                  - sqs:*
+                Resource: !GetAtt SQSCodeMetricsQueue.Arn
+
+
+  SQSCodeMetricsQueue:
+    Type: AWS::SQS::Queue
+    Properties:
+      QueueName: !Ref SQSFila
+      MessageRetentionPeriod: 864000
+
+  CodeMetricsQueuePolicy:
+    Type: AWS::SQS::QueuePolicy
+    Properties:
+      PolicyDocument:
+        Version: 2012-10-17
+        Id: MyQueuePolicy
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service:
+                - events.amazonaws.com
+                - sqs.amazonaws.com
+            Action: ['sqs:SendMessage']
+            Resource: !GetAtt SQSCodeMetricsQueue.Arn
+      Queues: [!Ref 'SQSCodeMetricsQueue']
+
+  DyTable:
+    Type: AWS::DynamoDB::Table
+    Properties:
+      TableName: !Sub ${DyTableName}
+      AttributeDefinitions:
+        - AttributeName: id
+          AttributeType: S
+      KeySchema:
+        - AttributeName: id
+          KeyType: HASH
+      ProvisionedThroughput:
+        ReadCapacityUnits: 5
+        WriteCapacityUnits: 5
+
+
+  S3Repo:
+    Type: AWS::S3::Bucket
+    Properties:
+      BucketName: !Sub ${S3Bucket}

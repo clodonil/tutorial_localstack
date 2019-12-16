@@ -1,0 +1,17 @@
+{
+  "queries": [
+    "SELECT * FROM 'my/topic1' WHERE foo = 123",
+    "SELECT * FROM 'my/topic1' WHERE foo = 234",
+    "SELECT * FROM 'my/topic2' WHERE foo = 234"
+  ],
+  "messages": {
+    "my/topic1": [
+      "{\"foo\": 123, \"topic\": 1}",
+      "{\"foo\": 123, \"topic\": 1}"
+    ],
+    "my/topic2": [
+      "{\"foo\": 123, \"topic\": 2}",
+      "{\"foo\": 234, \"topic\": 2}"
+    ]
+  }
+}
