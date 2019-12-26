@@ -1,0 +1,11 @@
+version: 0.2
+phases:
+  install:
+    commands:
+      - pip install --upgrade pip
+  build:
+    commands:
+      - gatsby build
+  post_build:
+    commands:
+      - aws s3 sync public/ s3://stagging

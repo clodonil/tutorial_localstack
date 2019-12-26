@@ -1,0 +1,319 @@
+AWSTemplateFormatVersion: "2010-09-09"
+Description: Pipeline de Deploy com LocalStack
+Parameters:
+  projetoName:
+    Description: Nome do Projeto
+    Type: String
+    Default: app-exemplo
+
+  projetoName:
+    Description: Nome do Projeto
+    Type: String
+    Default: app-exemplo
+
+  RepoName:
+    Description: Nome do Repositorio
+    Type: String
+    Default: app-exemplo
+    
+    
+Metadata: 
+  AWS::CloudFormation::Interface: 
+    ParameterGroups: 
+      - 
+        Label: 
+          default: "Informacao da Pipeline"
+        Parameters: 
+          - projetoName
+          - RepoName
+
+Resources:
+  PipelineRole:
+     Type: "AWS::IAM::Role"
+     Properties:
+       RoleName:
+         Fn::Sub: PipelineRole-${AWS::StackName}
+       AssumeRolePolicyDocument:
+         Version: "2012-10-17"
+         Statement:
+           -
+             Effect: "Allow"
+             Principal:
+               Service:
+                 - "codepipeline.amazonaws.com"
+                 - "codebuild.amazonaws.com"
+             Action:
+               - "sts:AssumeRole"
+       Path: /
+       Policies:
+         -
+           PolicyName: "CodePipelineAccessPolicy"
+           PolicyDocument:
+             Version: "2012-10-17"
+             Statement:
+               -
+                 Effect: "Allow"
+                 Action:
+                   - s3:DeleteObject
+                   - s3:GetObject
+                   - s3:ListBucket
+                   - s3:PutObject
+                   - s3:GetObjectVersion                   
+                   - s3:GetBucketPolicy
+                   - codecommit:ListBranches
+                   - codecommit:ListRepositories
+                   - codecommit:BatchGetRepositories
+                   - codecommit:Get*
+                   - codecommit:GitPull
+                   - codecommit:ListBranches
+                   - codecommit:ListRepositories
+                   - codecommit:BatchGetRepositories
+                   - codebuild:StartBuild
+                   - codebuild:BatchGetBuilds
+                   - codebuild:StartBuild
+                   - codebuild:BatchGetBuilds
+                   - codedeploy:CreateDeployment
+                   - codedeploy:GetApplicationRevision
+                   - codedeploy:GetDeployment
+                   - codedeploy:GetDeploymentConfig
+                   - codedeploy:RegisterApplicationRevision
+                   - cloudformation:CreateStack
+                   - cloudformation:DeleteStack
+                   - cloudformation:DescribeStacks
+                   - cloudformation:UpdateStack
+                   - cloudformation:CreateChangeSet
+                   - cloudformation:DeleteChangeSet
+                   - cloudformation:DescribeChangeSet
+                   - cloudformation:ExecuteChangeSet
+                   - cloudformation:SetStackPolicy
+                   - cloudformation:ValidateTemplate
+                   - cloudformation:Get*
+                   - cloudformation:Describe*
+                   - cloudformation:List*
+                   - cloudformation:ValidateTemplate
+                   - logs:Describe*
+                   - logs:Get*
+                   - logs:CreateLogGroup
+                   - logs:CreateLogStream
+                   - logs:PutLogEvents   
+                   - iam:Get*
+                   - iam:List*
+                   - iam:PassRole 
+                   - sts:AssumeRole                   
+                 Resource: "*"
+
+  ArtifactStoreBucket:
+    Type: AWS::S3::Bucket
+    Properties:
+      VersioningConfiguration:
+        Status: Enabled
+
+  Build:
+    Type: AWS::CodeBuild::Project
+    Properties:
+      Name:
+        Fn::Sub: BuildProject-${AWS::StackName}
+      Description: Gerando imagem Docker
+      ServiceRole:
+         Fn::GetAtt: [PipelineRole, Arn ]
+      Artifacts:
+        Type: CODEPIPELINE         
+      Environment:
+        Type: LINUX_CONTAINER
+        ComputeType: BUILD_GENERAL1_SMALL
+        Image: aws/codebuild/standard:2.0
+        PrivilegedMode: true
+      Source:
+        Type: CODEPIPELINE
+        BuildSpec: 'pipeline/build-app.yml'
+
+  IntegrationTesting:
+    Type: AWS::CodeBuild::Project
+    Properties:
+      Name:
+        Fn::Sub: IntegrationTesting-${AWS::StackName}
+      Description: Gerando imagem Docker
+      ServiceRole:
+         Fn::GetAtt: [PipelineRole, Arn ]
+      Artifacts:
+        Type: CODEPIPELINE         
+      Environment:
+        Type: LINUX_CONTAINER
+        ComputeType: BUILD_GENERAL1_SMALL
+        Image: aws/codebuild/standard:2.0
+        PrivilegedMode: true
+      Source:
+        Type: CODEPIPELINE
+        BuildSpec: 'pipeline/integration_tests.yml'
+
+  AICLint:
+    Type: AWS::CodeBuild::Project
+    Properties:
+      Name:
+        Fn::Sub: AICLint-${AWS::StackName}
+      Description: Gerando imagem Docker
+      ServiceRole:
+         Fn::GetAtt: [PipelineRole, Arn ]
+      Artifacts:
+        Type: CODEPIPELINE         
+      Environment:
+        Type: LINUX_CONTAINER
+        ComputeType: BUILD_GENERAL1_SMALL
+        Image: aws/codebuild/standard:2.0
+        PrivilegedMode: true
+      Source:
+        Type: CODEPIPELINE
+        BuildSpec: 'pipeline/lint-aic.yml'
+
+  AICApply:
+    Type: AWS::CodeBuild::Project
+    Properties:
+      Name:
+        Fn::Sub:  AICApply-${AWS::StackName}
+      Description: Gerando imagem Docker
+      ServiceRole:
+         Fn::GetAtt: [PipelineRole, Arn ]
+      Artifacts:
+        Type: CODEPIPELINE         
+      Environment:
+        Type: LINUX_CONTAINER
+        ComputeType: BUILD_GENERAL1_SMALL
+        Image: aws/codebuild/standard:2.0
+        PrivilegedMode: true
+      Source:
+        Type: CODEPIPELINE
+        BuildSpec: 'pipeline/deploy-infra.yml'
+
+  Deploy:
+    Type: AWS::CodeBuild::Project
+    Properties:
+      Name:
+        Fn::Sub:  Deploy-${AWS::StackName}
+      Description: Gerando imagem Docker
+      ServiceRole:
+         Fn::GetAtt: [PipelineRole, Arn ]
+      Artifacts:
+        Type: CODEPIPELINE         
+      Environment:
+        Type: LINUX_CONTAINER
+        ComputeType: BUILD_GENERAL1_SMALL
+        Image: aws/codebuild/standard:2.0
+        PrivilegedMode: true
+      Source:
+        Type: CODEPIPELINE
+        BuildSpec: 'pipeline/deploy-app.yml'
+
+
+  Pipeline:
+    Type: AWS::CodePipeline::Pipeline
+    Properties:
+      Name:
+         Fn::Sub: Pipeline-${AWS::StackName}
+      RoleArn:
+             Fn::GetAtt: [ PipelineRole, Arn ]
+      ArtifactStore:
+             Type: S3
+             Location: !Ref ArtifactStoreBucket
+      Stages:
+        - Name: SourceCode
+          Actions:
+            - Name: Source
+              ActionTypeId:
+                Category: Source
+                Owner: AWS
+                Provider: CodeCommit
+                Version: '1'
+              OutputArtifacts:
+                - Name: Source
+              Configuration:
+                BranchName: master
+                RepositoryName: !Ref 'RepoName'
+              RunOrder: 1
+        -
+          Name: CI
+          Actions:
+            -
+              Name: Build-APP
+              InputArtifacts:
+                - Name: Source
+              ActionTypeId:
+                Category: Build
+                Owner: AWS
+                Version: 1
+                Provider: CodeBuild
+              OutputArtifacts:
+                - Name: Build
+              Configuration:
+                ProjectName:
+                  Ref: Build
+              RunOrder: 1
+            -
+              Name: Integration-Testing
+              InputArtifacts:
+                - Name: Source
+              ActionTypeId:
+                Category: Build
+                Owner: AWS
+                Version: 1
+                Provider: CodeBuild
+              OutputArtifacts:
+                - Name: IntegrationTesting
+              Configuration:
+                ProjectName:
+                  Ref: IntegrationTesting
+              RunOrder: 1
+            -
+              Name: AIC-Lint
+              InputArtifacts:
+                - Name: Source
+              ActionTypeId:
+                Category: Build
+                Owner: AWS
+                Version: 1
+                Provider: CodeBuild
+              OutputArtifacts:
+                - Name: AICLint
+              Configuration:
+                ProjectName:
+                  Ref: IntegrationTesting
+              RunOrder: 1
+
+        -
+          Name: Deploy-Infra
+          Actions:
+            -
+              Name: Build
+              InputArtifacts:
+                - Name: Source
+              ActionTypeId:
+                Category: Build
+                Owner: AWS
+                Version: 1
+                Provider: CodeBuild
+              OutputArtifacts:
+                - Name: AICApply
+              Configuration:
+                ProjectName:
+                  Ref: AICApply
+              RunOrder: 1
+
+        -
+          Name: Deploy-APP
+          Actions:
+            -
+              Name: Build
+              InputArtifacts:
+                - Name: Source
+              ActionTypeId:
+                Category: Build
+                Owner: AWS
+                Version: 1
+                Provider: CodeBuild
+              OutputArtifacts:
+                - Name: Deploy
+              Configuration:
+                ProjectName:
+                  Ref: Deploy
+              RunOrder: 1
+              
+
