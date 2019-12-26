@@ -412,3 +412,8 @@ $ aws --endpoint-url=http://localhost:4567 apigateway create-resource --rest-api
 ```
 $ aws --endpoint-url=http://localhost:4567 apigateway put-method --rest-api-id 36twoi21n1 --resource-id nxoi851xk0 --http-method GET --authorization-type "NONE" --request-parameters method.request.querystring.greeter=false
 ```
+
+
+
+
+https://aws.amazon.com/pt/premiumsupport/knowledge-center/iam-assume-role-cli/
