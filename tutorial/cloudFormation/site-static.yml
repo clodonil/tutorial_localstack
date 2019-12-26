@@ -1,0 +1,46 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Description: Static website
+
+Parameters:
+  DomainName:
+    Description: Domain name of website
+    Type: String
+    Default: exemplo
+
+Resources:
+  S3BucketLogs:
+    Type: AWS::S3::Bucket
+    DeletionPolicy: Delete
+    Properties:
+      AccessControl: LogDeliveryWrite
+      BucketName: !Sub '${AWS::StackName}-logs'
+
+
+  S3BucketRoot:
+    Type: AWS::S3::Bucket
+    DeletionPolicy: Delete
+    Properties:
+      AccessControl: PublicRead
+      BucketName: !Sub '${AWS::StackName}-root'
+      LoggingConfiguration:
+        DestinationBucketName: !Ref S3BucketLogs
+        LogFilePrefix: 'cdn/'
+      WebsiteConfiguration:
+        ErrorDocument: '404.html'
+        IndexDocument: 'index.html'
+
+  S3BucketPolicy:
+    Type: AWS::S3::BucketPolicy
+    Properties:
+      Bucket: !Ref S3BucketRoot
+      PolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+          - Effect: 'Allow'
+            Action: 's3:GetObject'
+            Principal: '*'
+            Resource: !Sub '${S3BucketRoot.Arn}/*'
+
+          - Effect: 'Allow'
+            Action: 's3:*'
+            Principal: 'arn:aws:iam::000000000000:root' 

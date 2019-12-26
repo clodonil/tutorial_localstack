@@ -104,6 +104,7 @@ Listando todos os bucket.
 
 ```
 $ aws  --endpoint-url=http://localhost:4572 s3 ls
+$ aws  --endpoint-url=http://localhost:4572 s3api list-buckets
 ```
 
 Copiando o arquivo para o bucket
