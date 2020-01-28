@@ -1,0 +1,22 @@
+{
+    "nameFunction": "LambdaApresentacaoDev",
+    "handler": "lambda_function.my_lambda",    
+    "payload": {
+        "input": [
+            {
+                "CT01": {
+                    "event": "10"   ,
+                    "context": "Null"        
+                }
+            }
+        ],
+        "output": [
+            {
+                "CT01": {
+                    "message": "Hello, World!!!",
+                    "result": true
+                }
+            }
+        ]
+    }
+}
