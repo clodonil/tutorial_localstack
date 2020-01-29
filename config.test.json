@@ -1,22 +1,33 @@
 {
-    "nameFunction": "LambdaApresentacaoDev",
+    "nameFunction": "mylambda",
     "handler": "lambda_function.my_lambda",    
     "payload": {
         "input": [
             {
-                "CT01": {
-                    "event": "10"   ,
-                    "context": "Null"        
+                "TEST1": {
+                    "numero": "10"
+                }
+            },
+            {
+                "TEST2": {
+                    "numero": "11"
                 }
             }
         ],
         "output": [
             {
-                "CT01": {
+                "TEST1": {
                     "message": "Hello, World!!!",
                     "result": true
                 }
+            },
+            {
+                "TEST2": {
+                    "message": "Hello, World!!!",
+                    "result": false
+                }
             }
+
         ]
     }
 }

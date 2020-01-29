@@ -22,8 +22,8 @@ def create_client_with_auth(name_client, account_id):
 def execution_test(path_payload=None, account_id=None):      
       
     try:  
-        client = create_client_with_auth("lambda", account_id)  
-        #client = boto3.client('lambda')  
+        #client = create_client_with_auth("lambda", account_id)  
+        client = boto3.client('lambda', endpoint_url="http://localhost:4574")  
           
         with open(path_payload) as myfile:  
             config = json.loads(myfile.read())  
